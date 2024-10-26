@@ -1,0 +1,6 @@
+- verifier le bon deroulement de chaque telechargement de programme vital (curl, wget, git,...) et exit si erreur
+
+- importer config vimrc perso
+
+
+- ajouter la fonctionnalite de demander a l'utilisateur de valider pour passer a l'etape suivante du processus
