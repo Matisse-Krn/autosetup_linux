@@ -6,6 +6,20 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+ask_confirmation()
+{
+# Request user confirmation with error handling
+	while true; do
+		read -p "$1 (y/n): " -n 1 -r
+		echo
+		if [[ $REPLY =~ ^[YyNn]$ ]]; then
+			break
+		else
+			echo "Invalid input. Please enter 'y' for Yes or 'n' for No."
+		fi
+	done
+}
+
 update_system()
 {
 	# Updating the system
@@ -100,41 +114,6 @@ install_firefox()
 	# Install firefox in .deb version (or tranfer the snap firefox version profile
 	# to .deb future installation, and install it)
 	echo "Starting .deb version of Firefox installation..."
-# Demander à l'utilisateur de choisir la langue de Firefox
-	echo "Would you like to change the language code for Firefox installation ?"
-	echo "The default language is 'en-US'."
-	echo "Enter one of the language codes below, or press 'enter' to keep 'en-US'."
-	echo "For example :"
-	echo "	en-US	: English (US)"
-	echo "	en-GB	: English (British)"
-	echo "	fr	: French"
-	echo "	de	: German"
-	echo "	es-ES	: Spanish (Spain)"
-	echo "	(Refer to README.md for the full list of language codes."
-	echo "You can find it at : https://download.cdn.mozilla.net/pub/\
-		firefox/releases/latest/README.txt)"
-	lang_code="en-US"
-	read -p "Enter the language code or 'enter' to keep default language (default : en-US): " lang_code
-
-# Déterminer l'OS automatiquement
-	if uname -m | grep -q 'x86_64'; then
-		os="linux64"
-	else
-		os="linux"
-	fi
-
-# Construire l'URL de téléchargement de Firefox
-firefox_url="https://download.mozilla.org/?product=firefox-latest&os=$os&lang=$lang_code"
-
-# Télécharger Firefox
-echo "Downloading Firefox for OS: $os and Language: $lang_code..."
-wget -O firefox-latest.tar.bz2 "$firefox_url"
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to download Firefox. Please check your internet connection or the language code."
-    exit 1
-fi
-
-echo "Firefox downloaded successfully!"
 # Check disk space for Firefox installation
 	echo "Checking available disk space..."
 	AVAILABLE_SPACE=$(df ~/ | grep -vE '^Filesystem' | awk '{print $4}')
@@ -152,24 +131,25 @@ echo "Firefox downloaded successfully!"
 
 # Ask for confirmation to proceed with the installation
 	read -p "Do you want to proceed with the installation of Firefox ? (y/n)" -n 1 -r
-	echo
+	ask_confirmation "Please confirm"
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
 # Perform the actual installation of Firefox
+		echo "Proceeding with the installation of Firefox..."
 # Verification and copy of snap firefox version profile
 		echo "User profile transfer (from snap to .deb)..."
 		if [ -d ~/snap/firefox/common/.mozilla/firefox/ ]; then
 			mkdir -p ~/.mozilla/firefox/
 			cp -a ~/snap/firefox/common/.mozilla/firefox/* ~/.mozilla/firefox/
-			echo "Tranfer done !"
+			echo "Transfer done !"
 		else
 			echo "No such snap firefox version profile finded. Let's continue !"
 		fi
 
-	# Update and install necessary dependencies
+# Update and install necessary dependencies
 		echo "Install necessary dependencies..."
 		sudo apt-get update
 		sudo apt-get install -y curl wget apt-transport-https dirmngr ca-certificates
-		echo "Needed dependencies installed !"
+		echo "Needed dependencies are now installed !"
 
 # Remove snap version of firefox, and clean up any previous .deb installations
 		echo "Removing snap version of firefox, and clean up any \
@@ -199,7 +179,7 @@ echo "Firefox downloaded successfully!"
 		echo "Firefox preferences and automatic updates configured !"
 
 # Install Firefox from official Mozilla repository
-		echo "Installation of Firefox from official Mozille repository..."
+		echo "Installation of Firefox from official Mozilla repository..."
 		sudo apt-get update
 		sudo apt-get -y install firefox
 		echo "Firefox installation done !"
