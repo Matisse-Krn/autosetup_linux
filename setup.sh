@@ -6,6 +6,20 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+import_config-files()
+{
+	# Import these config files into '~/'
+# Déterminer le répertoire du script
+	SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+# Copier les fichiers de configuration vers le répertoire personnel de l'utilisateur
+	echo "Importation configuration files..."
+	cp "$SCRIPT_DIR/.bashrc" ~/
+	cp "$SCRIPT_DIR/.bashaliases" ~/
+	cp "$SCRIPT_DIR/.vimrc" ~/
+	cp "$SCRIPT_DIR/.zshrc" ~/
+	echo "Configuration files copied successfully to your home directory '~/'."
+}
 ask_confirmation()
 {
 # Request user confirmation with error handling
@@ -29,9 +43,9 @@ sudo apt update -y && sudo apt upgrade -y
 
 install-essential()
 {
-	# Install programs
-echo "Installing essential programs : git, vim, curl, wget, zsh, build-essential..."
-sudo apt install -y git vim curl wget zsh build-essential
+	# Install essential programs
+echo "Installing essential programs : bat, git, vim, curl, wget, zsh, build-essential..."
+sudo apt install -y bat git vim curl wget zsh build-essential
 }
 
 add_aliases()
@@ -39,6 +53,7 @@ add_aliases()
 	# Configure personnal aliases
 echo "Setting up custom aliases..."
 echo "#My aliases (import from autosetup project)\n" >> ~/.zshrc
+echo "alias bat='batcat'" >> ~/.zshrc
 echo "alias agud='sudo apt-get update'" >> ~/.zshrc
 echo "alias agug='sudo apt-get upgrade'" >> ~/.zshrc
 echo "alias norm='norminette -R CheckForbiddenSourceHeader'" >> ~/.zshrc

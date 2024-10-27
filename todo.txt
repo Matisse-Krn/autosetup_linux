@@ -1,8 +1,9 @@
 - verifier le bon deroulement de chaque telechargement de programme vital (curl, wget, git,...) et exit si erreur
 
-- gerer le cas ou l'utilisateur entrerai autre chose que 'y' ou 'n' lors d'une demande de validation
+//- gerer le cas ou l'utilisateur entrerai autre chose que 'y' ou 'n' lors d'une demande de validation
 
-- importer config vimrc perso
+//- importer config vimrc perso
 
+- gerer la copie initiale de cle ssh ?
 
-- ajouter la fonctionnalite de demander a l'utilisateur de valider pour passer a l'etape suivante du processus
+/- ajouter la fonctionnalite de demander a l'utilisateur de valider pour passer a l'etape suivante du processus
