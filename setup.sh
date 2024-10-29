@@ -12,10 +12,11 @@ sudo_execute()
 import_config_files()
 {
 	# Import config files into '~/'
-# Set script directory
-	echo "Import some customs config files into '~/'
+# Set script and user's directories
+	echo "Importing custom config files into the user's home directory...
 	"
 	SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+	USER_HOME=$(eval echo "~$SUDO_USER")
 
 # Check existence of source directory
 	if [ ! -d "$SCRIPT_DIR/dotfiles" ]; then
@@ -23,25 +24,10 @@ import_config_files()
 		return 1
 	fi
 
-# Retrieve initial user's home directory (not root)
-	USER_HOME=$(eval echo "~$SUDO_USER")
-	echo "USER_HOME is set to: $USER_HOME"
-
-# Copy configuration files to user's home directory
-	echo "Importing configuration files into user's home directory..."
-
 # Copy each file and check success
-	cp "$SCRIPT_DIR/dotfiles/.bashrc" "$USER_HOME/"
-	[ $? -eq 0 ] && echo ".bashrc copied successfully" || echo "Failed to copy .bashrc"
-
-	cp "$SCRIPT_DIR/dotfiles/.bash_aliases" "$USER_HOME/"
-	[ $? -eq 0 ] && echo ".bash_aliases copied successfully" || echo "Failed to copy .bash_aliases"
-
-	cp "/home/humaan/autosetup_linux/dotfiles/.vimrc" "$USER_HOME/"
-	[ $? -eq 0 ] && echo ".vimrc copied successfully" || echo "Failed to copy .vimrc"
-
-	cp "$SCRIPT_DIR/dotfiles/.zshrc" "$USER_HOME/"
-	[ $? -eq 0 ] && echo ".zshrc copied successfully" || echo "Failed to copy .zshrc"
+	for file in ".bashrc" ".bash_aliases" ".vimrc" ".zshrc"; do
+		cp "$SCRIPT_DIR/dotfiles/$file" "$USER_HOME/" && echo "$file copied successfully" || echo "Failed to copy $file"
+	done
 
 	echo "Configuration files successfully copied to your home directory !
 
@@ -106,17 +92,17 @@ Please confirm"
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			echo "alias bat='batcat'" >> ~/.zshrc
 		fi
-		read -p "Do you want to use 'agud' for 'sudo apt-get update' ? (y/n) " -n 1 -r
+		read -p "Do you want to use 'update' for 'sudo apt-get update' ? (y/n) " -n 1 -r
                 ask_confirmation "
 Please confirm"
                 if [[ $REPLY =~ ^[Yy]$ ]]; then
-			echo "alias agud='sudo apt-get update'" >> ~/.zshrc
+			echo "alias update='sudo apt-get update'" >> ~/.zshrc
 		fi
-		read -p "Do you want to use 'agug' for 'sudo apt-get upgrade' ? (y/n) " -n 1 -r
+		read -p "Do you want to use 'upgrade' for 'sudo apt-get upgrade' ? (y/n) " -n 1 -r
                 ask_confirmation "
 Please confirm"
                 if [[ $REPLY =~ ^[Yy]$ ]]; then
-			echo "alias agug='sudo apt-get upgrade'" >> ~/.zshrc
+			echo "alias upgrade='sudo apt-get upgrade'" >> ~/.zshrc
 		fi
 		read -p "Do you want to use 'norm' for 'norminette -R CheckForbiddenSourceHeader' ? (y/n) " -n 1 -r
                 ask_confirmation "
@@ -527,7 +513,6 @@ Please confirm"
 }
 
 sudo_execute
-echo "Calling import_config_files function..."
 import_config_files
 update_system
 install_essential
