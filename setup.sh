@@ -13,8 +13,9 @@ import_config_files()
 {
 	# Import config files into '~/'
 # Set script and user's directories
-	echo "Importing custom config files into the user's home directory...
-	"
+	echo "Importing custom config files into the user's home directory..."
+	echo
+	echo
 	SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 	USER_HOME=$(eval echo "~$SUDO_USER")
 
@@ -31,21 +32,31 @@ import_config_files()
 
 	echo "Configuration files successfully copied to your home directory !
 
+
 	"
 }
 
 ask_confirmation()
 {
-# Request user confirmation with error handling
 	while true; do
-		read -p "$1 (y/n): " -n 1 -r
+		read -p "$1 (y/n): " -n 1 -r first_reply  # 1. Lire la première réponse
 		echo
-		if [[ $REPLY =~ ^[YyNn]$ ]]; then
-			break
+		if [[ $first_reply =~ ^[YyNn]$ ]]; then  # 2. Vérifier si la première réponse est valide
+			while true; do
+				read -p "Please confirm (same answer as before, y/n): " -n 1 -r second_reply  # 3. Lire la seconde réponse
+				echo
+				if [[ $second_reply =~ ^[YyNn]$ ]]; then  # 4. Vérifier si la seconde réponse est valide
+					if [[ $first_reply == $second_reply ]]; then  # 5. Comparer les deux réponses
+						[[ $first_reply =~ ^[Yy]$ ]] && return 0 || return 1  # 6. Retourner 0 pour 'yes', 1 pour 'no'
+					else
+						echo "The answers do not match. Please try again."  # 7. Les réponses ne correspondent pas
+					fi
+				else
+					echo "Invalid input. Please enter 'y' for Yes or 'n' for No."
+				fi
+			done
 		else
-			echo "Invalid input. Please enter 'y' for Yes or 'n' for No.
-			
-			"
+			echo "Invalid input. Please enter 'y' for Yes or 'n' for No."
 		fi
 	done
 }
@@ -56,11 +67,12 @@ update_system()
 	echo "Updating package lists and upgrading installed packages...
 	
 	"
-	sudo apt update -y && sudo apt upgrade -y
-	echo "
-
-
-	"
+	sudo apt update -y
+	echo
+	sudo apt upgrade -y
+	echo
+	echo
+	echo
 }
 
 install_essential()
@@ -70,10 +82,9 @@ install_essential()
 	
 	"
 	sudo apt install -y bat tree git vim curl wget zsh build-essential
-	echo "
-
-
-	"
+	echo
+	echo
+	echo
 }
 
 add_aliases()

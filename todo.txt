@@ -22,7 +22,7 @@ error: Failed to execute child process “dbus-launch” (No such file or direct
 
 - revoir install_discord : pourquoi renvoit `sha256sum: /root/discord.deb.sha256: no properly formatted checksum lines found` ?
 
-- revoir pourquoi les configs files ne sont pas rellement copiés dans ~/ ...?
+//- revoir pourquoi les configs files ne sont pas rellement copiés dans ~/ ...?
 
 - Ecrire README
 
