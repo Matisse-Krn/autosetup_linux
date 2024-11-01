@@ -98,11 +98,24 @@ update_system()
 install_essential()
 {
 	# Install essential programs
-	echo "Installing essential programs : bat, tree, git, vim, curl, wget, zsh, build-essential..."
+	echo "Installing essential packages (git, curl, wget, zsh)"
 	echo
-	echo
-	sudo apt install -y bat tree git vim curl wget zsh build-essential
-	echo
+# Essential packages list
+	essential_packages=("git" "curl" "wget" "zsh")
+	# Installing essential packages
+	for pkg in "${essential_packages[@]}"; do
+		if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+			echo "Installing $pkg..."
+			if ! sudo apt-get install -y "$pkg"; then
+				echo "Error : $pkg installation failed. Please check the dependencies or your internet connection."
+				exit 1
+			fi
+		else
+			echo "$pkg is already installed."
+		fi
+	done
+
+	echo "All essential packages are correctly installed !"
 	echo
 	echo
 }
