@@ -49,7 +49,7 @@ import_config_files()
 ask()
 {
 	while true; do
-		read -p "$1 (y/n): " -n 1 -r first_reply
+		read -p "$1 (y/n) : " -n 1 -r first_reply
 		echo
 
 		if [[ ! $first_reply =~ ^[YyNn]$ ]]; then
@@ -84,10 +84,12 @@ ask()
 update_system()
 {
 	# Updating the system
-	echo "Updating package lists and upgrading installed packages..."
-	echo
+	echo "Updating package lists..."
 	echo
 	sudo apt update -y
+	echo
+	echo
+	echo "Upgrading installed packages..."
 	echo
 	sudo apt upgrade -y
 	echo
@@ -95,18 +97,18 @@ update_system()
 	echo
 }
 
-install_essential()
+install_essential_packages()
 {
-	# Install essential programs
+	# Function to install essential programs
 	echo "Installing essential packages (git, curl, wget, zsh)"
 	echo
 # Essential packages list
 	essential_packages=("git" "curl" "wget" "zsh")
-	# Installing essential packages
+# Installing essential packages
 	for pkg in "${essential_packages[@]}"; do
 		if ! dpkg -s "$pkg" >/dev/null 2>&1; then
 			echo "Installing $pkg..."
-			if ! sudo apt-get install -y "$pkg"; then
+			if ! sudo apt install -y "$pkg"; then
 				echo "Error : $pkg installation failed. Please check the dependencies or your internet connection."
 				exit 1
 			fi
@@ -116,6 +118,44 @@ install_essential()
 	done
 
 	echo "All essential packages are correctly installed !"
+	echo
+	echo
+	echo
+}
+
+install_optional_packages()
+{
+	echo "Installing (or not) some optionnal packages"
+	echo
+	# Function to install optional packages
+	declare -A optional_packages_descriptions=(
+		["bat"]="A cat clone with syntax highlighting and Git integration."
+		["tree"]="A directory listing command that displays directories as a tree structure."
+		["vim"]="A highly configurable text editor built to enable efficient text editing."
+		["build-essential"]="A package that installs essential packages for building software (gcc, make, etc.)."
+	)
+
+	for pkg in "${!optional_packages_descriptions[@]}"; do
+		description=${optional_packages_descriptions[$pkg]}
+		echo "$pkg: $description"
+		if ask "Do you want to install $pkg?"; then
+			if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+				echo "Installing $pkg..."
+				sudo apt install -y "$pkg"
+				echo
+				echo "$pkg installation completed."
+			else
+				echo "$pkg is already installed."
+			fi
+		else
+			echo "$pkg installation skipped."
+			echo
+		fi
+		echo
+	done
+
+	echo "The optional packages installation process is now complete !"
+	echo
 	echo
 	echo
 }
@@ -348,7 +388,6 @@ install_firefox()
 			echo "Not enough disk space for Firefox installation. Installation cancelled."
 			echo
 			echo
-			echo
 			return 0
 		else
 			AVAILABLE_SPACE_GB=$(echo "scale=2; $AVAILABLE_SPACE/1048576" | bc)
@@ -501,44 +540,6 @@ Pin-Priority: 1000
 			else
 				echo "Error: Failed to install Firefox .deb version. Please check the cause manually."
 			fi
-#			for user_home in /home/*; do
-#				user_name=$(basename "$user_home")
-#				profile_target_dir="$user_home/.mozilla/firefox"
-#
-# Check and restore the profile from the .deb backup
-#				backup_dir_deb="$user_home/.mozilla/firefox_backup_$(date +%Y%m%d)"
-#				if [ -d "$backup_dir_deb" ]; then
-#					echo "Restore profile (.deb) of $user_name from $backup_dir_deb..."
-# Delete existing files to avoid conflicts
-#					rm -rf "$profile_target_dir"
-#					cp -a "$backup_dir_deb" "$profile_target_dir"
-#					echo "Restoration of $user_name profile (.deb) complete."
-#				fi
-# Verify and restore profile from snap backup
-#				backup_dir_snap="$user_home/snap/firefox/common/.mozilla/firefox_backup_$(date +%Y%m%d)"
-#				if [ -d "$backup_dir_snap" ]; then
-#					echo "Restore profile (snap) of $user_name from $backup_dir_snap"
-# Copy snap profile to target directory
-#					cp -a "$backup_dir_snap"/* "$profile_target_dir"
-#					echo "Restoration of $user_name profile (snap) complete."
-#				fi
-# Verify and restore the profile from the flatpak backup
-#				backup_dir_flatpak="$user_home/.var/app/org.mozilla.firefox/.mozilla/firefox_backup_$(date +%Y%m%d)"
-#				if [ -d "$backup_dir_flatpak" ]; then
-#					echo "Restore profile (flatpak) of $user_name from $backup_dir_flatpak"
-# Copy flatpak profile to target directory
-#					cp -a "$backup_dir_flatpak"/* "$profile_target_dir"
-#					echo "Restoration of $user_name profile (flatpak) complete."
-#				fi
-# Check whether the target directory has been populated
-#				if [ -d "$profile_target_dir" ] && [ "$(ls -A "$profile_target_dir")" ]; then
-#					echo "Complete restoration of the $user_name profile to the .deb version."
-#				else
-#					echo "No profile backup found for $user_name."
-#				fi
-#			done
-#			echo
-#			echo "Profile restoration to .deb version complete."
 			echo "Installation and configuration of Firefox .deb complete !"
 		else
 			echo "Firefox installation cancelled."
@@ -663,7 +664,8 @@ below, before validating installation)..."
 sudo_execute
 update_system
 import_config_files
-install_essential
+install_essential_packages
+install_optional_packages
 config_git
 setup_ohmyzsh
 personnalize_terminal
@@ -672,6 +674,5 @@ install_firefox
 install_discord
 add_aliases
 
-echo "Configuration changes are applied in this terminal. Please close 
-and re-open the terminal to apply changes for future sessions."
+echo "Configuration changes are applied in this terminal. Please close and re-open the terminal to apply changes for future sessions."
 
