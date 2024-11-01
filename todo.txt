@@ -12,7 +12,9 @@
 
 - revoir l'utilité d'importer les config files, étant donné que les aliases sont ajouté (ou non) manuellement pendant l'exec du script...? D'autres paramètres sont présents dans ces config files, mais il ne faut pas qu'ils incluent les aliases lors de l'importation initiale.
 
-- Modifier logique de ask_confirmation (dans le cas où l'utilisateur répond n, puis y par exemple)
+- ajouter la possibilite a l'utilisateur d'installer les paquets linguistiques .deb de firefox (cf https://support.mozilla.org/fr/kb/installer-firefox-linux#w_installation-par-paquet-deb-pour-les-distributions-basees-sur-debian-recommande )
+
+//- Modifier logique de ask_confirmation (dans le cas où l'utilisateur répond n, puis y par exemple)
 
 - revoir pourquoi personnalize_terminal renvoit : `
 error: Failed to execute child process “dbus-launch” (No such file or directory)
@@ -26,4 +28,4 @@ error: Failed to execute child process “dbus-launch” (No such file or direct
 
 - Ecrire README
 
--  
+- rendre public le repo 
