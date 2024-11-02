@@ -586,7 +586,7 @@ install_discord()
 			echo
 			echo
 			echo
-			rm ~/discord.deb
+			rm /tmp/discord.deb
 			return 0
 		else
 			AVAILABLE_SPACE_GB=$(echo "scale=2; $AVAILABLE_SPACE/1048576" | bc)
@@ -597,39 +597,15 @@ install_discord()
 # Download the Discord .deb file
 		echo "Downloading Discord .deb file..."
 		echo
-		wget -O ~/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
+		wget -O /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
 		echo "Discord .deb file downloaded !"
 		echo
 
-# Download the checksum file
-		echo "Downloading Discord checksum file..."
-		echo
-		wget -O ~/discord.deb.sha256 "https://discord.com/api/download?platform=linux&format=sha256"
-
-# Verify checksum
-		echo
-		echo "Verifying file integrity..."
-		echo
-		sha256sum -c ~/discord.deb.sha256
-		if [ $? -ne 0 ]; then
-			echo "Checksum verification failed. Installation aborted."
-			echo
-			echo
-			echo
-			rm ~/discord.deb ~/discord.deb.sha256
-			return 0
-		else
-			echo "Checksum verification is valid. Let's continue !"
-			echo
-			rm ~/discord.deb.sha256
-		fi
-
 # Check dependencies with a dry-run installation
-		echo "Checking required dependencies (see the result of virtual installation 
-below, before validating installation)..."
+		echo "Checking required dependencies (see the result of virtual installation below, before validating installation)..."
 		echo
 		echo
-		sudo apt install ~/discord.deb --dry-run
+		sudo apt install /tmp/discord.deb --dry-run
 		echo
 		echo
 
@@ -638,16 +614,15 @@ below, before validating installation)..."
 # Perform the actual installation of Discord
 			echo "Discord will be installed..."
 			echo
-			echo
-			sudo apt install -y ~/discord.deb
+			sudo apt install /tmp/discord.deb
 # Remove the downloaded .deb file
-			rm ~/discord.deb
+			rm /tmp/discord.deb
 			echo
 			echo
-			echo "Discord installation completed successfully."
+			echo "Discord installation completed successfully !"
 		else
 			echo "Installation cancelled."
-			rm ~/discord.deb
+			rm /tmp/discord.deb
 			echo
 			echo
 			echo
@@ -663,16 +638,16 @@ below, before validating installation)..."
 
 sudo_execute
 update_system
-import_config_files
-install_essential_packages
-install_optional_packages
-config_git
-setup_ohmyzsh
-personnalize_terminal
-install_norminette
-install_firefox
+#import_config_files
+#install_essential_packages
+#install_optional_packages
+#config_git
+#setup_ohmyzsh
+#personnalize_terminal
+#install_norminette
+#install_firefox
 install_discord
-add_aliases
+#add_aliases
 
 echo "Configuration changes are applied in this terminal. Please close and re-open the terminal to apply changes for future sessions."
 
