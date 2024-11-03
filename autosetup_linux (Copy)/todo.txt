@@ -1,0 +1,31 @@
+//- verifier le bon deroulement de chaque telechargement de programme vital (curl, wget, git,...) et exit si erreur
+
+//- gerer le cas ou l'utilisateur entrerai autre chose que 'y' ou 'n' lors d'une demande de validation
+
+//- importer config vimrc perso
+
+//- gerer la copie initiale de cle ssh ?
+
+//- ajouter la fonctionnalite de demander a l'utilisateur de valider pour passer a l'etape suivante du processus
+
+- modifier le chemin où doit-être ajouté les aliases si l'utilisateur refuse d'utiliser OhMyZsh (.bashrc ou .bashaliases)
+
+- revoir l'utilité d'importer les config files, étant donné que les aliases sont ajouté (ou non) manuellement pendant l'exec du script...? D'autres paramètres sont présents dans ces config files, mais il ne faut pas qu'ils incluent les aliases lors de l'importation initiale.
+
+- ajouter la possibilite a l'utilisateur d'installer les paquets linguistiques .deb de firefox (cf https://support.mozilla.org/fr/kb/installer-firefox-linux#w_installation-par-paquet-deb-pour-les-distributions-basees-sur-debian-recommande )
+
+//- Modifier logique de ask_confirmation (dans le cas où l'utilisateur répond n, puis y par exemple)
+
+- revoir pourquoi personnalize_terminal renvoit : `
+error: Failed to execute child process “dbus-launch” (No such file or directory)
+error: Failed to execute child process “dbus-launch” (No such file or directory)
+error: Failed to execute child process “dbus-launch” (No such file or directory)
+`
+
+//- revoir install_discord : pourquoi renvoit `sha256sum: /root/discord.deb.sha256: no properly formatted checksum lines found` ?
+
+//- revoir pourquoi les configs files ne sont pas rellement copiés dans ~/ ...?
+
+- Ecrire README
+
+- rendre public le repo 
