@@ -26,6 +26,8 @@ error: Failed to execute child process “dbus-launch” (No such file or direct
 
 //- revoir pourquoi les configs files ne sont pas rellement copiés dans ~/ ...?
 
+- ajout fonctionnalite installer protonpass
+
 - Ecrire README
 
 - rendre public le repo 
