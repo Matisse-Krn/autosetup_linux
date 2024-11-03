@@ -1,4 +1,4 @@
-- verifier le bon deroulement de chaque telechargement de programme vital (curl, wget, git,...) et exit si erreur
+//- verifier le bon deroulement de chaque telechargement de programme vital (curl, wget, git,...) et exit si erreur
 
 //- gerer le cas ou l'utilisateur entrerai autre chose que 'y' ou 'n' lors d'une demande de validation
 
@@ -22,7 +22,7 @@ error: Failed to execute child process “dbus-launch” (No such file or direct
 error: Failed to execute child process “dbus-launch” (No such file or directory)
 `
 
-- revoir install_discord : pourquoi renvoit `sha256sum: /root/discord.deb.sha256: no properly formatted checksum lines found` ?
+//- revoir install_discord : pourquoi renvoit `sha256sum: /root/discord.deb.sha256: no properly formatted checksum lines found` ?
 
 //- revoir pourquoi les configs files ne sont pas rellement copiés dans ~/ ...?
 

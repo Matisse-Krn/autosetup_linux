@@ -1,2 +1,0 @@
-- cloner repo via URL (pas SSH)
-- 

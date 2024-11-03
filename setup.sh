@@ -100,10 +100,10 @@ update_system()
 install_essential_packages()
 {
 	# Function to install essential programs
-	echo "Installing essential packages (git, curl, wget, zsh)"
+	echo "Installing essential packages (git, curl, wget)"
 	echo
 # Essential packages list
-	essential_packages=("git" "curl" "wget" "zsh")
+	essential_packages=("git" "curl" "wget")
 # Installing essential packages
 	for pkg in "${essential_packages[@]}"; do
 		if ! dpkg -s "$pkg" >/dev/null 2>&1; then
@@ -216,24 +216,59 @@ config_git()
 {
 	echo "Git configuration"
 	echo
-	echo
 	if ask "Do you want to configure git ? (y/n) "; then
-		echo
-	# Configure git
 		echo "Configuring Git..."
 		echo
-		read -p "Enter your Git user name: " git_username
-		read -p "Enter your Git email address: " git_email
-		git config --global user.name "$git_username"
-		git config --global user.email "$git_email"
-		echo "Git configuration completed with username: '$git_username' and email: '$git_email'"
+
+		# Saisie du nom d'utilisateur et vérification qu'il n'est pas vide
+		while true; do
+			read -p "Enter your Git user name: " git_username
+			if [ -z "$git_username" ]; then
+				echo "Username cannot be empty. Please enter a valid username."
+			else
+				break
+			fi
+		done
+
+		# Saisie de l'email et vérification qu'il n'est pas vide
+		while true; do
+			read -p "Enter your Git email address: " git_email
+			if [ -z "$git_email" ]; then
+				echo "Email cannot be empty. Please enter a valid email address."
+			else
+				break
+			fi
+		done
+
+		# Application de la configuration Git pour l'utilisateur
+		if sudo -u "$SUDO_USER" git config --global user.name "$git_username" &&
+		   sudo -u "$SUDO_USER" git config --global user.email "$git_email"; then
+			echo "Git configuration completed with username: '$git_username' and email: '$git_email'"
+		else
+			echo "Failed to configure Git. Please check your installation or permissions."
+		fi
+
+		# Vérification que la configuration a été appliquée correctement
+		echo
+		echo "Verifying Git configuration..."
+		actual_username=$(sudo -u "$SUDO_USER" git config --global user.name)
+		actual_email=$(sudo -u "$SUDO_USER" git config --global user.email)
+
+		if [ "$actual_username" = "$git_username" ] && [ "$actual_email" = "$git_email" ]; then
+			echo "Git has been successfully configured."
+			echo "Git Username: $actual_username"
+			echo "Git Email: $actual_email"
+		else
+			echo "There was an issue applying the Git configuration."
+		fi
 	else
-		echo "Git has not been configured with your information. (You can do it later with 'git config --global user.name' and 'git config --global user.email'"
+		echo "Git has not been configured with your information. (You can do it later with 'git config --global user.name' and 'git config --global user.email')"
 	fi
 	echo
 	echo
 	echo
 }
+
 
 setup_ohmyzsh()
 {
@@ -241,29 +276,88 @@ setup_ohmyzsh()
 	echo
 	echo
 	if ask "Do you want to use (and setup) OhMyZsh ? (y/n) "; then
-# Set Zsh as default terminal
+# Vérifier si Zsh est installé
 		echo
-		echo "Configure Zsh as default terminal..."
-		echo
-		if [ "$SHELL" != "/bin/zsh" ]; then
-			chsh -s /bin/zsh
-			echo "Zsh is now the default terminal !"
+		if ! command -v zsh >/dev/null 2>&1; then
+			echo "Zsh is not installed. Installing Zsh..."
+			echo
+			sudo apt-get update
+			echo
+			echo
+			sudo apt-get install -y zsh
+			echo
+			if command -v zsh >/dev/null 2>&1; then
+				echo "Zsh successfully installed. Let's continue !"
+				echo
+			else
+				echo "Failed to install Zsh. Please check your internet connection or package manager settings."
+				echo
+				echo
+				echo
+				return 1
+			fi
+		else
+			echo "Zsh is already installed."
 			echo
 		fi
-
-# Configure terminal with Oh-My-Zsh
-		echo "Configure terminal with Oh-My-Zsh..."
-		echo
-		if [ ! -d "$HOME/.oh-my-zsh" ]; then
-			sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-# Reload zsh configuration to apply changes
-			source ~/.zshrc
-			echo "Configuration changes are applied in this terminal, but you have to 
-close it and reopen it to apply changes for next times."
+# Configurer Zsh comme terminal par défaut si ce n'est pas déjà le cas
+		echo "Configuring Zsh as the default shell for the user $SUDO_USER..."
+		if [ "$(getent passwd "$SUDO_USER" | cut -d: -f7)" != "/bin/zsh" ]; then
+			if echo "$SUDO_USER:$(which zsh)" | sudo chsh -s "$(which zsh)" "$SUDO_USER"; then
+				echo "Zsh is now set as the default shell for $SUDO_USER."
+			else
+				echo "Failed to set Zsh as the default shell for $SUDO_USER. You might need to check permissions."
+				echo
+				echo
+				echo
+				return 1
+			fi
+		else
+			echo "Zsh is already the default shell for $SUDO_USER."
 		fi
+		echo
+		echo
+# Install OhMyZsh
+		echo "Installing Oh-My-Zsh for user $SUDO_USER..."
+		echo
+		if [ ! -d "/home/$SUDO_USER/.oh-my-zsh" ]; then
+# Exécuter l'installation d'OhMyZsh
+			curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o /tmp/ohmyzsh_install.sh
+			sed -i 's/^exec zsh -l/#exec zsh -l/' /tmp/ohmyzsh_install.sh
+			sudo -u "$SUDO_USER" RUNZSH=~no sh /tmp/ohmyzsh_install.sh --unattended
+			rm /tmp/ohmyzsh_install.sh
+# Vérifier si l'installation a réussi
+			echo
+			if [ -d "/home/$SUDO_USER/.oh-my-zsh" ]; then
+				echo "OhMyZsh installation successful for user $SUDO_USER !"
+				echo
+				echo "Close and reopen the terminal to apply OhMyZsh settings."
+			else
+				echo "OhMyZsh installation failed for user $SUDO_USER. Please check your internet connection or permissions."
+				echo
+				echo
+				echo
+				return 1
+			fi
+		else
+			echo "OhMyZsh is already installed for $SUDO_USER."
+		fi
+		echo
+# Ajouter le lancement de Zsh dans .bashrc de l'utilisateur
+		bashrc_path="/home/$SUDO_USER/.bashrc"
+		zsh_launch_code="[ -t 1 ] && exec zsh"
+		if ! grep -qxF "$zsh_launch_code" "$bashrc_path"; then
+			echo "Adding Zsh launch command to $bashrc_path..."
+			echo -e "\n# Launch Zsh at bash terminal startup\n$zsh_launch_code" | sudo tee -a "$bashrc_path" > /dev/null
+			echo "Zsh launch command added to $bashrc_path."
+		else
+			echo "Zsh launch command already exists in $bashrc_path."
+		fi
+
 	else
 		echo "OhMyZsh installation and configuration cancelled."
 	fi
+	echo "Settings applied. You may need to reopen the terminal to see the full effect."
 	echo
 	echo
 	echo
@@ -586,7 +680,6 @@ install_discord()
 			echo
 			echo
 			echo
-			rm /tmp/discord.deb
 			return 0
 		else
 			AVAILABLE_SPACE_GB=$(echo "scale=2; $AVAILABLE_SPACE/1048576" | bc)
@@ -638,16 +731,16 @@ install_discord()
 
 sudo_execute
 update_system
-#import_config_files
-#install_essential_packages
-#install_optional_packages
-#config_git
-#setup_ohmyzsh
-#personnalize_terminal
-#install_norminette
-#install_firefox
+import_config_files
+install_essential_packages
+install_optional_packages
+config_git
+setup_ohmyzsh
+personnalize_terminal
+install_norminette
+install_firefox
 install_discord
-#add_aliases
+add_aliases
 
 echo "Configuration changes are applied in this terminal. Please close and re-open the terminal to apply changes for future sessions."
 
